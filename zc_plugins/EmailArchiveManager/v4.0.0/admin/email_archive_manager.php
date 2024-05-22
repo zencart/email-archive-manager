@@ -12,7 +12,7 @@
  * Email Archive Manager
 */
 
-define('SUBJECT_SIZE_LIMIT',  25);
+define('SUBJECT_SIZE_LIMIT',  200);
 define('MESSAGE_SIZE_LIMIT',  550);
 define('MESSAGE_LIMIT_BREAK',  '&hellip;');
 
@@ -20,7 +20,14 @@ require 'includes/application_top.php';
 
 $max_records_per_page = (int)MAX_DISPLAY_SEARCH_RESULTS_ORDERS;
 
-function zen_get_email_archive_search_query(string $search_text, string $sd_raw, string $ed_raw, string $search_module, bool $errorsOnly): string
+function zen_get_email_archive_search_query(
+    string $search_text,
+    string $sd_raw,
+    string $ed_raw,
+    string $search_module,
+    string $showErrors,
+    string $error_keywords,
+): string
 {
     $select_fields = [
         'archive_id',
@@ -33,11 +40,21 @@ function zen_get_email_archive_search_query(string $search_text, string $sd_raw,
         'email_text',
         'date_sent',
         'module',
-        'errorinfo',
     ];
     $where_clauses = [];
 
-    $archive_search_sql = 'SELECT ' . implode(', ', $select_fields) . ' FROM ' . TABLE_EMAIL_ARCHIVE . " \n";
+    if (!empty($error_keywords)) {
+        $where_clauses[] = "errorinfo LIKE '%$error_keywords%'";
+    }
+
+    if ($showErrors !== 'off') {
+        // We are displaying errorinfo column.
+        $select_fields[] = 'errorinfo';
+        if ($showErrors === 'only') {
+            // We only want rows that had some errorinfo
+            $where_clauses[] = 'errorinfo IS NOT NULL';
+        }
+    }
 
     if (!empty($sd_raw)) {
         $where_clauses[] = "date_sent >= '" . zen_db_input($sd_raw) . "'";
@@ -56,9 +73,8 @@ function zen_get_email_archive_search_query(string $search_text, string $sd_raw,
         $where_clauses[] = "module = '" . zen_db_input($search_module) . "'";
     }
 
-    if ($errorsOnly) {
-        $where_clauses[] = 'errorinfo IS NOT NULL';
-    }
+    // Build the SQL
+    $archive_search_sql = 'SELECT ' . implode(', ', $select_fields) . ' FROM ' . TABLE_EMAIL_ARCHIVE . " \n";
 
     if (count($where_clauses) !== 0) {
         $archive_search_sql .= ' WHERE (' . implode(")\n AND (", $where_clauses) . ")\n";
@@ -82,7 +98,15 @@ function zen_is_message_trustable($from, $module): bool
 
 
 $allow_html = true;
-$errorsOnly = ($_POST['errors_only'] ?? 0) > 0;
+// Error text search state
+// $search_errors = ((isset($_GET['errorinfo']) && zen_not_null($_GET['errorinfo'])) ? true : false);
+$error_keywords = zen_db_input(zen_db_prepare_input($_POST['errorinfo'] ?? ''));
+// Radio button state
+$showErrors = $_POST['show_errors'] ?? 'off';
+if ($showErrors === 'off' && !empty($error_keywords)) {
+    $showErrors = 'all_inc'; // force option on
+}
+// Search text state
 $search_text = isset($_POST['search_text']) && zen_not_null($_POST['search_text']) ? $_POST['search_text'] : '';
 $search_module = !empty($_POST['module']) && (int)$_POST['module'] !== 1 ? $_POST['module'] : 0;
 $search_sd = !empty($_POST['start_date']);
@@ -120,7 +144,7 @@ if (zcDate::validateDate($ed_raw) !== true) {
     $search_ed = false;
 }
 
-$archive_search_sql = zen_get_email_archive_search_query($search_text, $sd_raw, $ed_raw, $search_module, $errorsOnly);
+$archive_search_sql = zen_get_email_archive_search_query($search_text, $sd_raw, $ed_raw, $search_module, $showErrors, $error_keywords);
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 $isForDisplay = true;
@@ -337,20 +361,20 @@ if ($isForDisplay) { ?>
         <div class="row">
             <div class="col-sm-3">
                 <div class="form-group">
-                    <?php echo zen_draw_label(HEADING_START_DATE, 'start_date', 'class="col-sm-12 control-label"'); ?>
+                    <?= zen_draw_label(HEADING_START_DATE, 'start_date', 'class="col-sm-12 control-label"'); ?>
                     <div class="col-sm-12">
                         <div class="date input-group" id="datepicker_start_date">
-                            <span class="input-group-addon datepicker_icon"><?php echo zen_icon('calendar-days', size: 'lg') ?></span>
-                            <?php echo zen_draw_input_field('start_date', $sd_raw, 'class="form-control" id="start_date"'); ?>
+                            <span class="input-group-addon datepicker_icon"><?= zen_icon('calendar-days', size: 'lg') ?></span>
+                            <?= zen_draw_input_field('start_date', $sd_raw, 'class="form-control" id="start_date"'); ?>
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <?php echo zen_draw_label(HEADING_END_DATE, 'end_date', 'class="col-sm-12 control-label mt-3"'); ?>
+                    <?= zen_draw_label(HEADING_END_DATE, 'end_date', 'class="col-sm-12 control-label mt-3"'); ?>
                     <div class="col-sm-12">
                         <div class="date input-group" id="datepicker_end_date">
-                            <span class="input-group-addon datepicker_icon"><?php echo zen_icon('calendar-days', size: 'lg') ?></span>
-                            <?php echo zen_draw_input_field('end_date', $ed_raw, 'class="form-control" id="end_date"'); ?>
+                            <span class="input-group-addon datepicker_icon"><?= zen_icon('calendar-days', size: 'lg') ?></span>
+                            <?= zen_draw_input_field('end_date', $ed_raw, 'class="form-control" id="end_date"'); ?>
                         </div>
                     </div>
                 </div>
@@ -362,6 +386,15 @@ if ($isForDisplay) { ?>
                     <?php
                     if (!empty($search_text)) {
                         echo '<br>' . HEADING_SEARCH_TEXT_FILTER . zen_output_string_protected($search_text);
+                    }
+                    ?>
+                </div>
+                <div class="form-group">
+                    <?= zen_draw_label(HEADING_SEARCH_ERROR, 'errorinfo', 'class="control-label"') ?>
+                    <?= zen_draw_input_field('errorinfo', $error_keywords, 'id="errorinfo" class="form-control"') ?>
+                    <?php
+                    if (!empty($error_keywords)) {
+                        echo '<br>' . HEADING_SEARCH_TEXT_FILTER . zen_output_string_protected($error_keywords);
                     }
                     ?>
                 </div>
@@ -381,10 +414,19 @@ if ($isForDisplay) { ?>
                     </label>
                 </div>
                 <div class="checkbox">
-                    <label for="errors_only">
-                        <?= zen_draw_checkbox_field('errors_only', 1, $errorsOnly, '', 'id="errors_only"') ?>
-                        <?= HEADING_ERRORS_ONLY ?>
+                    <?= HEADING_SHOW_ERRORS . '&nbsp;' .
+                        '<i class="fa-solid fa-circle-info text-primary" title="' . TOOLTIP_SHOW_ERRORS . '"></i>&nbsp;'; ?>
+                    <div class="btn-group" data-toggle="buttons">
+                    <label class="btn btn-xs btn-primary <?= $showErrors === 'off' ? 'active' : '' ?>">
+                        <input type="radio" name="show_errors" value="off" autocomplete="off" <?= $showErrors === 'off' ? 'checked' : '' ?>> <?= HEADING_SHOW_ERRORS_OFF ?>
                     </label>
+                    <label class="btn btn-xs btn-primary <?= $showErrors === 'all_inc' ? 'active' : '' ?>">
+                        <input type="radio" name="show_errors" value="all_inc" autocomplete="off" <?= $showErrors === 'all_inc' ? 'checked' : '' ?>> <?= HEADING_SHOW_ERRORS_ALL_INC ?>
+                    </label>
+                    <label class="btn btn-xs btn-primary <?= $showErrors === 'only' ? 'active' : '' ?>">
+                        <input type="radio" name="show_errors" value="only" autocomplete="off" <?= $showErrors === 'only' ? 'checked' : '' ?>> <?= HEADING_SHOW_ERRORS_ONLY ?>
+                    </label>
+                    </div>
                 </div>
 
                 <input type="submit" value="<?= BUTTON_SEARCH ?>" class="btn btn-primary">
@@ -407,9 +449,11 @@ if ($isForDisplay) { ?>
                 <th class="dataTableHeadingContent" align="left"><?= TABLE_HEADING_CUSTOMERS_NAME ?></th>
                 <th class="dataTableHeadingContent" align="left"><?= TABLE_HEADING_CUSTOMERS_EMAIL ?></th>
                 <th class="dataTableHeadingContent" align="left"><?= TABLE_HEADING_EMAIL_SUBJECT ?></th>
+                <?php if ($showErrors !== 'off') { ?>
                 <th class="dataTableHeadingContent" align="left"><?= TABLE_HEADING_EMAIL_ERRORINFO ?></th>
+                <?php } ?>
                 <th class="dataTableHeadingContent" align="right"><?= TABLE_HEADING_EMAIL_FORMAT ?></th>
-                <th class="dataTableHeadingContent text-right"><?php echo TABLE_HEADING_ACTION; ?></th>
+                <th class="dataTableHeadingContent text-right"><?= TABLE_HEADING_ACTION; ?></th>
             </tr>
             </thead>
             <tbody>
@@ -455,13 +499,15 @@ if ($isForDisplay) { ?>
                 $role = 'role="option" aria-selected="true"';
             }
             ?>
-            <tr <?php echo $class_and_id; ?> onclick="document.location.href='<?= $href ?>'" <?= $role;?>>
-                <td class="dataTableContent text-center"><?php echo $archive_record['archive_id']; ?></td>
+            <tr <?= $class_and_id; ?> onclick="document.location.href='<?= $href ?>'" <?= $role;?>>
+                <td class="dataTableContent text-center"><?= $archive_record['archive_id']; ?></td>
                 <td class="dataTableContent"><?= zen_datetime_short($archive_record['date_sent']) ?></td>
                 <td class="dataTableContent"><?= $archive_record['email_to_name'] ?></td>
                 <td class="dataTableContent"><?= $archive_record['email_to_address'] ?></td>
-                <td class="dataTableContent"><?= zen_output_string_protected(zen_trunc_string($archive_record['email_subject'], (SUBJECT_SIZE_LIMIT > 0) ? SUBJECT_SIZE_LIMIT : 200)) ?></td>
-                <td class="dataTableContent errorinfoText"><?= zen_output_string_protected(zen_trunc_string($archive_record['errorinfo'], (MESSAGE_SIZE_LIMIT > 0) ? MESSAGE_SIZE_LIMIT : 2048)) ?></td>
+                <td class="dataTableContent overflowText"><?= zen_output_string_protected(zen_trunc_string($archive_record['email_subject'], (SUBJECT_SIZE_LIMIT > 0) ? SUBJECT_SIZE_LIMIT : 200)) ?></td>
+                <?php if ($showErrors == 'all_inc' || $showErrors == 'only') { ?>
+                <td class="dataTableContent overflowText" align="left"><?= zen_output_string_protected(zen_trunc_string($archive_record['errorinfo'], (MESSAGE_SIZE_LIMIT > 0) ? MESSAGE_SIZE_LIMIT : 2048)) ?></td>
+                <?php } ?>
                 <td class="dataTableContent"><?= !empty($archive_record['email_html']) ? TABLE_FORMAT_HTML : TABLE_FORMAT_TEXT ?></td>
                 <td class="dataTableContent text-right actions">
                 <?php
@@ -469,8 +515,8 @@ if ($isForDisplay) { ?>
                         echo zen_icon('caret-right', ICON_SELECTED, '2x', true);
                     } else {
                     ?>
-                    <a href="<?php echo zen_href_link(FILENAME_EMAIL_HISTORY,  $href_page_param . 'archive_id=' . $archive_record['archive_id']);?>" role="button" title="<?php echo IMAGE_ICON_INFO;?>">
-                        <?php echo zen_icon('circle-info', '', '2x', true, false) ?>
+                    <a href="<?= zen_href_link(FILENAME_EMAIL_HISTORY,  $href_page_param . 'archive_id=' . $archive_record['archive_id']);?>" role="button" title="<?= IMAGE_ICON_INFO;?>">
+                        <?= zen_icon('circle-info', '', '2x', true, false) ?>
                     </a>
                     <?php
                     }

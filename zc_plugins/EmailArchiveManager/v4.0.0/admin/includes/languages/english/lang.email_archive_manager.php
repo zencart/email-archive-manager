@@ -13,11 +13,19 @@ $define = [
     'HEADING_MODULE_SELECT' =>  'Filter by module:',
     'HEADING_SEARCH_TEXT' =>  'Search for text:',
     'HEADING_SEARCH_TEXT_FILTER' =>  'Current search filter: ',
+    'HEADING_SEARCH_ERROR' => 'Search for error',
     'HEADING_START_DATE' =>  'Start Date:',
     'HEADING_END_DATE' =>  'End Date:',
     'HEADING_PRINT_FORMAT' =>  'Display results in print format?',
-    'HEADING_ERRORS_ONLY' => 'Limit to Records with Errors only?',
+    'HEADING_SHOW_ERRORS' => 'Display Errors (if any)',
+    'HEADING_SHOW_ERRORS_OFF' => 'Off',
+    'HEADING_SHOW_ERRORS_ALL_INC' => 'All Incl Error',
+    'HEADING_SHOW_ERRORS_ONLY' => 'Only With Error',
     'HEADING_TRIM_INSTRUCT' =>  'Delete email older than...',
+
+    'TOOLTIP_SEARCH_TEXT' => 'Searches in: Recipient Name and Address, email Subject, email HTML and TEXT content.',
+    'TOOLTIP_SHOW_ERRORS' => 'Adds an \'Error Info\' column to the table below and filters results accordingly.',
+    'TOOLTIP_SEARCH_ERROR' => 'Searches in Error Info and turns on \'Display Errors\'.',
 
     'HEADING_TEXT_INSTEAD' =>  'Showing TEXT for safety; HTML may be malicious.',
 
