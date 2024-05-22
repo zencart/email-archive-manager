@@ -1,0 +1,24 @@
+/*
+ * css for email_archive_manager
+ */
+
+.warningBox {
+    /*background-color: #FF9999;*/
+}
+
+.warningText {
+    font-size: 10px;
+    font-weight: bold;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    border-color: #FF0000;
+    border-style: solid;
+    border-width: 5px;
+}
+
+.errorinfoText {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 12em;
+    overflow: hidden;
+}
