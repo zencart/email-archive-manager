@@ -12,9 +12,9 @@
  * Email Archive Manager
 */
 
-define('SUBJECT_SIZE_LIMIT',  200);
-define('MESSAGE_SIZE_LIMIT',  550);
-define('MESSAGE_LIMIT_BREAK',  '&hellip;');
+define('SUBJECT_SIZE_LIMIT', 200);
+define('MESSAGE_SIZE_LIMIT', 550);
+define('MESSAGE_LIMIT_BREAK', '&hellip;');
 
 require 'includes/application_top.php';
 
@@ -39,7 +39,7 @@ function zen_get_email_archive_search_query(
         'email_text',
         'date_sent',
         'module',
-        'errorinfo'
+        'errorinfo',
     ];
     $where_clauses = [];
 
@@ -58,7 +58,7 @@ function zen_get_email_archive_search_query(
     if (!empty($search_text)) {
         $keywords = zen_db_input(zen_db_prepare_input($search_text));
         $where_clauses[] = implode(' OR ', array_map(
-            static fn($field) => "$field LIKE '%" . zen_db_input($keywords) . "%'",
+            static fn($field) => "$field LIKE '%$keywords%'",
                 ['email_to_address', 'email_subject', 'email_html', 'email_text', 'email_to_name', 'errorinfo']
             )
         );
@@ -93,7 +93,7 @@ function zen_is_message_trustable($from, $module): bool
 
 
 $allow_html = true;
-$only_errors = ($_POST['only_errors'] ?? '0') == 1;
+$only_errors = !empty($_POST['only_errors']);
 $search_text = isset($_POST['search_text']) && zen_not_null($_POST['search_text']) ? $_POST['search_text'] : '';
 $search_module = !empty($_POST['module']) && (int)$_POST['module'] !== 1 ? $_POST['module'] : 0;
 $search_sd = !empty($_POST['start_date']);
@@ -145,7 +145,7 @@ if (zcDate::validateDate($ed_raw) !== true) {
 $archive_search_sql = zen_get_email_archive_search_query($search_text, $sd_raw, $ed_raw, $search_module, $only_errors);
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
-$isForDisplay = ($_POST['print_format'] ?? '0') == '0';
+$isForDisplay = empty($_POST['print_format']);
 if ($action === 'prev_text' || $action === 'prev_html') {
     $isForDisplay = false;
 }
@@ -324,7 +324,6 @@ if ($isForDisplay) { ?>
     </div>
 
 
-
         <?php
         break;
 
@@ -383,7 +382,7 @@ if ($isForDisplay) { ?>
             </div>
             <div class="col-sm-3">
                 <div class="form-group">
-                    <?= zen_draw_label(HEADING_SEARCH_TEXT . zen_icon('circle-info', TOOLTIP_SEARCH_TEXT), 'search_text', 'class="control-label"') ?>
+                    <?= zen_draw_label(HEADING_SEARCH_TEXT . ' ' . zen_icon('circle-info', TOOLTIP_SEARCH_TEXT), 'search_text', 'class="control-label"') ?>
                     <?= zen_draw_input_field('search_text', $search_text, 'id="search_text" class="form-control"') ?>
                     <?php
                     if (!empty($search_text)) {
@@ -428,12 +427,12 @@ if ($isForDisplay) { ?>
         <table class="table table-hover" role="listbox">
             <thead>
             <tr class="dataTableHeadingRow">
-                <th class="dataTableHeadingContent" align="left"><?= TABLE_HEADING_EMAIL_DATE ?></th>
-                <th class="dataTableHeadingContent" align="left"><?= TABLE_HEADING_CUSTOMERS_NAME ?></th>
-                <th class="dataTableHeadingContent" align="left"><?= TABLE_HEADING_CUSTOMERS_EMAIL ?></th>
-                <th class="dataTableHeadingContent" align="left"><?= TABLE_HEADING_EMAIL_SUBJECT ?></th>
-                <th class="dataTableHeadingContent" align="left"><?= TABLE_HEADING_EMAIL_ERRORINFO ?></th>
-                <th class="dataTableHeadingContent" align="right"><?= TABLE_HEADING_EMAIL_FORMAT ?></th>
+                <th class="dataTableHeadingContent"><?= TABLE_HEADING_EMAIL_DATE ?></th>
+                <th class="dataTableHeadingContent"><?= TABLE_HEADING_CUSTOMERS_NAME ?></th>
+                <th class="dataTableHeadingContent"><?= TABLE_HEADING_CUSTOMERS_EMAIL ?></th>
+                <th class="dataTableHeadingContent"><?= TABLE_HEADING_EMAIL_SUBJECT ?></th>
+                <th class="dataTableHeadingContent"><?= TABLE_HEADING_EMAIL_ERRORINFO ?></th>
+                <th class="dataTableHeadingContent text-right"><?= TABLE_HEADING_EMAIL_FORMAT ?></th>
                 <th class="dataTableHeadingContent text-right"><?= TABLE_HEADING_ACTION; ?></th>
             </tr>
             </thead>
@@ -480,21 +479,21 @@ if ($isForDisplay) { ?>
                 $role = 'role="option" aria-selected="true"';
             }
             ?>
-            <tr <?= $class_and_id; ?> onclick="document.location.href='<?= $href ?>'" <?= $role;?>>
+            <tr <?= $class_and_id; ?> onclick="document.location.href='<?= $href ?>'" <?= $role ?>>
                 <td class="dataTableContent"><?= zen_icon('circle-info', sprintf(TEXT_ARCHIVE_ID, $archive_record['archive_id'])) .
                     '&nbsp;' . zen_datetime_short($archive_record['date_sent']) ?></td>
                 <td class="dataTableContent"><?= $archive_record['email_to_name'] ?></td>
                 <td class="dataTableContent"><?= $archive_record['email_to_address'] ?></td>
                 <td class="dataTableContent overflowText"><?= zen_output_string_protected(zen_trunc_string($archive_record['email_subject'], SUBJECT_SIZE_LIMIT)) ?></td>
                 <td class="dataTableContent overflowText"><?= zen_output_string_protected(zen_trunc_string($archive_record['errorinfo'], MESSAGE_SIZE_LIMIT)) ?></td>
-                <td class="dataTableContent"><?= !empty($archive_record['email_html']) ? TABLE_FORMAT_HTML : TABLE_FORMAT_TEXT ?></td>
+                <td class="dataTableContent text-right"><?= !empty($archive_record['email_html']) ? TABLE_FORMAT_HTML : TABLE_FORMAT_TEXT ?></td>
                 <td class="dataTableContent text-right actions">
                 <?php
                     if (isset($archive) && is_object($archive) && ($archive_record['archive_id'] == $archive->archive_id) && $isForDisplay) {
                         echo zen_icon('caret-right', ICON_SELECTED, '2x', true);
                     } else {
                     ?>
-                    <a href="<?= zen_href_link(FILENAME_EMAIL_HISTORY,  $href_page_param . 'archive_id=' . $archive_record['archive_id']);?>" role="button" title="<?= IMAGE_ICON_INFO;?>">
+                    <a href="<?= zen_href_link(FILENAME_EMAIL_HISTORY, $href_page_param . 'archive_id=' . $archive_record['archive_id']) ?>" role="button" title="<?= IMAGE_ICON_INFO ?>">
                         <?= zen_icon('circle-info', '', '2x', true, false) ?>
                     </a>
                     <?php
@@ -504,7 +503,7 @@ if ($isForDisplay) { ?>
             </tr>
             <?php
             }
-            if ($results->EOF) {
+            if ($results->RecordCount() === 0) {
                 echo '<tr><td colspan="8" class="text-center"><strong>' . TEXT_NO_ARCHIVE_RECORDS_FOUND . '</strong></td></tr>';
             }
 
