@@ -25,8 +25,7 @@ function zen_get_email_archive_search_query(
     string $sd_raw,
     string $ed_raw,
     string $search_module,
-    string $showErrors,
-    string $error_keywords,
+    string $only_errors
 ): string
 {
     $select_fields = [
@@ -40,6 +39,7 @@ function zen_get_email_archive_search_query(
         'email_text',
         'date_sent',
         'module',
+        'errorinfo'
     ];
     $where_clauses = [];
 
@@ -47,13 +47,8 @@ function zen_get_email_archive_search_query(
         $where_clauses[] = "errorinfo LIKE '%$error_keywords%'";
     }
 
-    if ($showErrors !== 'off') {
-        // We are displaying errorinfo column.
-        $select_fields[] = 'errorinfo';
-        if ($showErrors === 'only') {
-            // We only want rows that had some errorinfo
-            $where_clauses[] = 'errorinfo IS NOT NULL';
-        }
+    if ($only_errors) {
+        $where_clauses[] = 'errorinfo IS NOT NULL';
     }
 
     if (!empty($sd_raw)) {
@@ -66,7 +61,11 @@ function zen_get_email_archive_search_query(
 
     if (!empty($search_text)) {
         $keywords = zen_db_input(zen_db_prepare_input($search_text));
-        $where_clauses[] = implode(' OR ', array_map(static fn($field) => "$field LIKE '%$keywords%'", ['email_to_address', 'email_subject', 'email_html', 'email_text', 'email_to_name', 'errorinfo']));
+        $where_clauses[] = implode(' OR ', array_map(
+            static fn($field) => "$field LIKE '%" . zen_db_input($keywords) . "%'",
+                ['email_to_address', 'email_subject', 'email_html', 'email_text', 'email_to_name', 'errorinfo']
+            )
+        );
     }
 
     if (!empty($search_module)) {
@@ -98,15 +97,7 @@ function zen_is_message_trustable($from, $module): bool
 
 
 $allow_html = true;
-// Error text search state
-// $search_errors = ((isset($_GET['errorinfo']) && zen_not_null($_GET['errorinfo'])) ? true : false);
-$error_keywords = zen_db_input(zen_db_prepare_input($_POST['errorinfo'] ?? ''));
-// Radio button state
-$showErrors = $_POST['show_errors'] ?? 'off';
-if ($showErrors === 'off' && !empty($error_keywords)) {
-    $showErrors = 'all_inc'; // force option on
-}
-// Search text state
+$only_errors = ($_POST['only_errors'] ?? '0') == 1;
 $search_text = isset($_POST['search_text']) && zen_not_null($_POST['search_text']) ? $_POST['search_text'] : '';
 $search_module = !empty($_POST['module']) && (int)$_POST['module'] !== 1 ? $_POST['module'] : 0;
 $search_sd = !empty($_POST['start_date']);
@@ -118,6 +109,7 @@ if ($search_sd) {
 if ($search_ed) {
     $ed_raw = $_POST['end_date'];
 }
+$date_range = $_POST['date_range'] ?? ' ';
 
 if (DATE_FORMAT_DATE_PICKER !== 'yy-mm-dd') {
     $local_fmt = zen_datepicker_format_fordate();
@@ -144,13 +136,10 @@ if (zcDate::validateDate($ed_raw) !== true) {
     $search_ed = false;
 }
 
-$archive_search_sql = zen_get_email_archive_search_query($search_text, $sd_raw, $ed_raw, $search_module, $showErrors, $error_keywords);
+$archive_search_sql = zen_get_email_archive_search_query($search_text, $sd_raw, $ed_raw, $search_module, $only_errors);
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
-$isForDisplay = true;
-if (isset($_POST['print_format']) && $_POST['print_format'] < 1) {
-    $isForDisplay = false;
-}
+$isForDisplay = ($_POST['print_format'] ?? '0') == '0';
 if ($action === 'prev_text' || $action === 'prev_html') {
     $isForDisplay = false;
 }
@@ -361,40 +350,38 @@ if ($isForDisplay) { ?>
         <div class="row">
             <div class="col-sm-3">
                 <div class="form-group">
-                    <?= zen_draw_label(HEADING_START_DATE, 'start_date', 'class="col-sm-12 control-label"'); ?>
-                    <div class="col-sm-12">
-                        <div class="date input-group" id="datepicker_start_date">
-                            <span class="input-group-addon datepicker_icon"><?= zen_icon('calendar-days', size: 'lg') ?></span>
-                            <?= zen_draw_input_field('start_date', $sd_raw, 'class="form-control" id="start_date"'); ?>
-                        </div>
+                    <?= zen_draw_label(HEADING_START_DATE, 'start_date', 'class="control-label"'); ?>
+                    <div class="date input-group" id="datepicker_start_date">
+                        <span class="input-group-addon datepicker_icon"><?= zen_icon('calendar-days', size: 'lg') ?></span>
+                        <?= zen_draw_input_field('start_date', $sd_raw, 'class="form-control" id="start_date"'); ?>
                     </div>
                 </div>
                 <div class="form-group">
-                    <?= zen_draw_label(HEADING_END_DATE, 'end_date', 'class="col-sm-12 control-label mt-3"'); ?>
-                    <div class="col-sm-12">
-                        <div class="date input-group" id="datepicker_end_date">
-                            <span class="input-group-addon datepicker_icon"><?= zen_icon('calendar-days', size: 'lg') ?></span>
-                            <?= zen_draw_input_field('end_date', $ed_raw, 'class="form-control" id="end_date"'); ?>
-                        </div>
+                    <?= zen_draw_label(HEADING_END_DATE, 'end_date', 'class="control-label"'); ?>
+                    <div class="date input-group" id="datepicker_end_date">
+                        <span class="input-group-addon datepicker_icon"><?= zen_icon('calendar-days', size: 'lg') ?></span>
+                        <?= zen_draw_input_field('end_date', $ed_raw, 'class="form-control" id="end_date"'); ?>
                     </div>
+                </div>
+                <div class="form-group">
+                    <?= zen_draw_label(HEADING_DATE_RANGE, 'date_range', 'class="control-label"'); ?>
+                    <?= zen_draw_pull_down_menu('date_range', [
+                        [ 'id' => ' ', 'text' => 'All time' ],
+                        [ 'id' => 'last_7_days', 'text' => 'Last 7 days' ],
+                        [ 'id' => 'last_30_days', 'text' => 'Last 30 days' ],
+                        [ 'id' => 'last_3_months', 'text' => 'Last 3 months' ],
+                        [ 'id' => 'last_year', 'text' => 'Last year' ],
+                    ],
+                    $date_range, 'id="date_range" class="form-control"') ?>
                 </div>
             </div>
             <div class="col-sm-3">
                 <div class="form-group">
-                    <?= zen_draw_label(HEADING_SEARCH_TEXT, 'search_text', 'class="control-label"') ?>
+                    <?= zen_draw_label(HEADING_SEARCH_TEXT . zen_icon('circle-info', TOOLTIP_SEARCH_TEXT), 'search_text', 'class="control-label"') ?>
                     <?= zen_draw_input_field('search_text', $search_text, 'id="search_text" class="form-control"') ?>
                     <?php
                     if (!empty($search_text)) {
                         echo '<br>' . HEADING_SEARCH_TEXT_FILTER . zen_output_string_protected($search_text);
-                    }
-                    ?>
-                </div>
-                <div class="form-group">
-                    <?= zen_draw_label(HEADING_SEARCH_ERROR, 'errorinfo', 'class="control-label"') ?>
-                    <?= zen_draw_input_field('errorinfo', $error_keywords, 'id="errorinfo" class="form-control"') ?>
-                    <?php
-                    if (!empty($error_keywords)) {
-                        echo '<br>' . HEADING_SEARCH_TEXT_FILTER . zen_output_string_protected($error_keywords);
                     }
                     ?>
                 </div>
@@ -409,24 +396,15 @@ if ($isForDisplay) { ?>
             <div class="col-sm-4">
                 <div class="checkbox">
                     <label for="print_format">
-                        <?= zen_draw_checkbox_field('print_format', 1, $isForDisplay, '', 'id="print_format"') ?>
+                        <?= zen_draw_checkbox_field('print_format', 1, !$isForDisplay, '', 'id="print_format"') ?>
                         <?= HEADING_PRINT_FORMAT ?>
                     </label>
                 </div>
                 <div class="checkbox">
-                    <?= HEADING_SHOW_ERRORS . '&nbsp;' .
-                        '<i class="fa-solid fa-circle-info text-primary" title="' . TOOLTIP_SHOW_ERRORS . '"></i>&nbsp;'; ?>
-                    <div class="btn-group" data-toggle="buttons">
-                    <label class="btn btn-xs btn-primary <?= $showErrors === 'off' ? 'active' : '' ?>">
-                        <input type="radio" name="show_errors" value="off" autocomplete="off" <?= $showErrors === 'off' ? 'checked' : '' ?>> <?= HEADING_SHOW_ERRORS_OFF ?>
+                <label for="print_format">
+                    <?= zen_draw_checkbox_field('only_errors', 1, $only_errors, '', 'id="only_errors"') ?>
+                        <?= HEADING_ONLY_ERRORS . '&nbsp;' . zen_icon('circle-info', TOOLTIP_ONLY_ERRORS) ?>
                     </label>
-                    <label class="btn btn-xs btn-primary <?= $showErrors === 'all_inc' ? 'active' : '' ?>">
-                        <input type="radio" name="show_errors" value="all_inc" autocomplete="off" <?= $showErrors === 'all_inc' ? 'checked' : '' ?>> <?= HEADING_SHOW_ERRORS_ALL_INC ?>
-                    </label>
-                    <label class="btn btn-xs btn-primary <?= $showErrors === 'only' ? 'active' : '' ?>">
-                        <input type="radio" name="show_errors" value="only" autocomplete="off" <?= $showErrors === 'only' ? 'checked' : '' ?>> <?= HEADING_SHOW_ERRORS_ONLY ?>
-                    </label>
-                    </div>
                 </div>
 
                 <input type="submit" value="<?= BUTTON_SEARCH ?>" class="btn btn-primary">
@@ -444,14 +422,11 @@ if ($isForDisplay) { ?>
         <table class="table table-hover" role="listbox">
             <thead>
             <tr class="dataTableHeadingRow">
-                <th class="dataTableHeadingContent" align="left"><?= TABLE_HEADING_ARCHIVE_ID ?></th>
                 <th class="dataTableHeadingContent" align="left"><?= TABLE_HEADING_EMAIL_DATE ?></th>
                 <th class="dataTableHeadingContent" align="left"><?= TABLE_HEADING_CUSTOMERS_NAME ?></th>
                 <th class="dataTableHeadingContent" align="left"><?= TABLE_HEADING_CUSTOMERS_EMAIL ?></th>
                 <th class="dataTableHeadingContent" align="left"><?= TABLE_HEADING_EMAIL_SUBJECT ?></th>
-                <?php if ($showErrors !== 'off') { ?>
                 <th class="dataTableHeadingContent" align="left"><?= TABLE_HEADING_EMAIL_ERRORINFO ?></th>
-                <?php } ?>
                 <th class="dataTableHeadingContent" align="right"><?= TABLE_HEADING_EMAIL_FORMAT ?></th>
                 <th class="dataTableHeadingContent text-right"><?= TABLE_HEADING_ACTION; ?></th>
             </tr>
@@ -500,16 +475,14 @@ if ($isForDisplay) { ?>
             }
             ?>
             <tr <?= $class_and_id; ?> onclick="document.location.href='<?= $href ?>'" <?= $role;?>>
-                <td class="dataTableContent text-center"><?= $archive_record['archive_id']; ?></td>
-                <td class="dataTableContent"><?= zen_datetime_short($archive_record['date_sent']) ?></td>
-                <td class="dataTableContent"><?= $archive_record['email_to_name'] ?></td>
-                <td class="dataTableContent"><?= $archive_record['email_to_address'] ?></td>
-                <td class="dataTableContent overflowText"><?= zen_output_string_protected(zen_trunc_string($archive_record['email_subject'], (SUBJECT_SIZE_LIMIT > 0) ? SUBJECT_SIZE_LIMIT : 200)) ?></td>
-                <?php if ($showErrors == 'all_inc' || $showErrors == 'only') { ?>
-                <td class="dataTableContent overflowText" align="left"><?= zen_output_string_protected(zen_trunc_string($archive_record['errorinfo'], (MESSAGE_SIZE_LIMIT > 0) ? MESSAGE_SIZE_LIMIT : 2048)) ?></td>
-                <?php } ?>
+                <td class="dataTableContent column-date-sent"><?= zen_icon('circle-info', sprintf(TEXT_ARCHIVE_ID, $archive_record['archive_id'])) .
+                    '&nbsp;' . zen_datetime_short($archive_record['date_sent']) ?></td>
+                <td class="dataTableContent column-email-to-name"><?= $archive_record['email_to_name'] ?></td>
+                <td class="dataTableContent column-email-to-address"><?= $archive_record['email_to_address'] ?></td>
+                <td class="dataTableContent column-email-subject overflowText"><?= zen_output_string_protected(zen_trunc_string($archive_record['email_subject'], SUBJECT_SIZE_LIMIT)) ?></td>
+                <td class="dataTableContent column-errorinfo overflowText"><?= zen_output_string_protected(zen_trunc_string($archive_record['errorinfo'], MESSAGE_SIZE_LIMIT)) ?></td>
                 <td class="dataTableContent"><?= !empty($archive_record['email_html']) ? TABLE_FORMAT_HTML : TABLE_FORMAT_TEXT ?></td>
-                <td class="dataTableContent text-right actions">
+                <td class="dataTableContent column-actions text-right actions">
                 <?php
                     if (isset($archive) && is_object($archive) && ($archive_record['archive_id'] == $archive->archive_id) && $isForDisplay) {
                         echo zen_icon('caret-right', ICON_SELECTED, '2x', true);
@@ -623,8 +596,40 @@ if ($isForDisplay) {
     <!-- script for datepicker -->
     <script>
         $(function () {
-            $('input[name="start_date"]').datepicker();
-            $('input[name="end_date"]').datepicker();
+            const startPicker = $('input[name="start_date"]').datepicker();
+            const endPicker = $('input[name="end_date"]').datepicker();
+            $('#date_range').on('change', (e) => {
+                console.log('Date range to ', e);
+                let start = new Date();
+                start.setUTCHours(0);
+                start.setUTCMinutes(0);
+                start.setUTCSeconds(0);
+                let end = new Date();
+                end.setUTCHours(23);
+                end.setUTCMinutes(59);
+                end.setUTCSeconds(59);
+                switch (e.target.value) {
+                    case ' ':
+                        start = null;
+                        end = null;
+                        break;
+                    case 'last_7_days':
+                        start.setUTCDate(start.getUTCDate() - 7);
+                        break;
+                    case 'last_30_days':
+                        start.setUTCDate(start.getUTCDate() - 30);
+                        break;
+                    case 'last_3_months':
+                        start.setUTCMonth(start.getUTCMonth() - 3);
+                        break;
+                    case 'last_year':
+                        start.setUTCMonth(start.getUTCMonth() - 12);
+                        break;
+                }
+
+                startPicker.datepicker('setDate', start);
+                endPicker.datepicker('setDate', end);
+            })
         })
     </script>
 <?php

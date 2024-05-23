@@ -16,20 +16,16 @@ $define = [
     'HEADING_SEARCH_ERROR' => 'Search for error',
     'HEADING_START_DATE' =>  'Start Date:',
     'HEADING_END_DATE' =>  'End Date:',
+    'HEADING_DATE_RANGE' =>  'Date Range:',
     'HEADING_PRINT_FORMAT' =>  'Display results in print format?',
-    'HEADING_SHOW_ERRORS' => 'Display Errors (if any)',
-    'HEADING_SHOW_ERRORS_OFF' => 'Off',
-    'HEADING_SHOW_ERRORS_ALL_INC' => 'All Incl Error',
-    'HEADING_SHOW_ERRORS_ONLY' => 'Only With Error',
+    'HEADING_ONLY_ERRORS' => 'Only With Error',
     'HEADING_TRIM_INSTRUCT' =>  'Delete email older than...',
 
-    'TOOLTIP_SEARCH_TEXT' => 'Searches in: Recipient Name and Address, email Subject, email HTML and TEXT content.',
-    'TOOLTIP_SHOW_ERRORS' => 'Adds an \'Error Info\' column to the table below and filters results accordingly.',
-    'TOOLTIP_SEARCH_ERROR' => 'Searches in Error Info and turns on \'Display Errors\'.',
+    'TOOLTIP_SEARCH_TEXT' => 'Searches in: Recipient Name and Address, email Subject, email HTML and TEXT content, and the Error Info column.',
+    'TOOLTIP_ONLY_ERRORS' => 'Only display rows with a value in the \'Error Info\' column, indicating an error occurred trying to send the email.',
 
     'HEADING_TEXT_INSTEAD' =>  'Showing TEXT for safety; HTML may be malicious.',
 
-    'TABLE_HEADING_ARCHIVE_ID' => 'Archive ID',
     'TABLE_HEADING_EMAIL_DATE' =>  'Date Sent',
     'TABLE_HEADING_CUSTOMERS_NAME' =>  'Customer Name',
     'TABLE_HEADING_CUSTOMERS_EMAIL' =>  'Email Address',
@@ -40,7 +36,7 @@ $define = [
     'TABLE_FORMAT_HTML' =>  'HTML',
 
     'TEXT_TRIM_ARCHIVE' =>  'Trim email archive...',
-    'TEXT_ARCHIVE_ID' =>  'Archive #',
+    'TEXT_ARCHIVE_ID' =>  'Archive #%d',
     'TEXT_ALL_MODULES' =>  'All Modules',
     'TEXT_DISPLAY_NUMBER_OF_EMAILS' =>  'Displaying <b>%d</b> to <b>%d</b> (of <b>%d</b> emails)',
     'TEXT_EMAIL_MODULE' =>  'Module: ',
