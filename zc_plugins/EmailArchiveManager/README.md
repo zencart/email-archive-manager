@@ -45,6 +45,7 @@ Installation:
 ## UPGRADING FROM OLDER VERSION BEFORE Zen Cart 2.0.0
 
 1. Delete the following old files from your store's server:
+
 `YOUR_ADMIN/email_archive_manager.php`
 `YOUR_ADMIN/includes/extra_datafiles/email_archive_manager_defines.php`
 `YOUR_ADMIN/includes/functions/extra_functions/reg_email_archive_manager.php`
