@@ -97,9 +97,7 @@ $action = $_GET['action'] ?? $_POST['action'] ?? '';
 $rememberable_vars = ['start_date', 'end_date', 'date_range', 'search_text', 'module', 'isForDisplay', 'only_errors'];
 if ($action === 'reset') {
     unset($_SESSION['email_archive_search_criteria']);
-    foreach($rememberable_vars as $var) {
-        unset($_POST[$var]);
-    }
+    zen_redirect(zen_href_link(FILENAME_EMAIL_HISTORY));
 }
 if ($action === 'search') {
     foreach($rememberable_vars as $var) {
