@@ -13,7 +13,6 @@ $define = [
     'HEADING_MODULE_SELECT' =>  'Filter by module:',
     'HEADING_SEARCH_TEXT' =>  'Search for text:',
     'HEADING_SEARCH_TEXT_FILTER' =>  'Current search filter: ',
-    'HEADING_SEARCH_ERROR' => 'Search for error',
     'HEADING_START_DATE' =>  'Start Date:',
     'HEADING_END_DATE' =>  'End Date:',
     'HEADING_DATE_RANGE' =>  'Date Range:',
