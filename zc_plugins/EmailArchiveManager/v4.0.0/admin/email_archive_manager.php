@@ -411,7 +411,7 @@ if ($isForDisplay) { ?>
                     </label>
                 </div>
                 <div class="checkbox">
-                <label for="print_format">
+                    <label for="only_errors">
                     <?= zen_draw_checkbox_field('only_errors', 1, $only_errors, '', 'id="only_errors"') ?>
                         <?= HEADING_ONLY_ERRORS . '&nbsp;' . zen_icon('circle-info', TOOLTIP_ONLY_ERRORS) ?>
                     </label>
