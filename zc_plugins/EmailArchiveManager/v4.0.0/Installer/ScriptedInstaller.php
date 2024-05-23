@@ -32,11 +32,10 @@ class ScriptedInstaller extends ScriptedInstallBase
 
     protected function executeInstall(): void
     {
-        global $db;
+        global $db, $sniffer;
         zen_deregister_admin_pages(['emailArchive']);
         zen_register_admin_page('emailArchive', 'BOX_TOOLS_EMAIL_ARCHIVE_MANAGER','FILENAME_EMAIL_HISTORY', '', 'tools', 'Y', 20);
 
-        global $sniffer;
         if (!$sniffer->field_exists(TABLE_EMAIL_ARCHIVE, 'errorinfo')) {
             $sql = 'ALTER TABLE ' . TABLE_EMAIL_ARCHIVE . ' ADD COLUMN errorinfo TEXT DEFAULT NULL';
             $this->executeInstallerSql($sql);
@@ -59,6 +58,7 @@ class ScriptedInstaller extends ScriptedInstallBase
     protected function executeUninstall(): void
     {
         zen_deregister_admin_pages(['emailArchive']);
-        // Note: Do not remove idx_email_date_sent_zen as it is expected to be in core Zen Cart post v2.1
+        // Note: Do not drop the errorinfo column, as it is part of ZC core structure
+        // Note: Do not remove idx_email_date_sent_zen as it is part of ZC core structure
     }
 }
