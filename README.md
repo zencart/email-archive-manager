@@ -11,8 +11,7 @@ Allows you to view emails sent by your shopping cart.  Requires the `Email Archi
 Note:
 If you are sending out HTML emails, you may view the HTML or plain text copy of your email.  However, for inbound emails that come from your website (ie: contact us, ask a question), you may only see the plain text version of an email.  This is because inbound emails may be malicious and can't be safely displayed in HTML format.
 
-![Screenshot](Email Archive manager screenshot.png)
-
+<p align="center"><img src="Email Archive manager screenshot.png" alt="Screenshot"></p>
 
 ## Installation instructions
 
