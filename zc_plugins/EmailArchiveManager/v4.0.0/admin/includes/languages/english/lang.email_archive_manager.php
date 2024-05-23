@@ -73,9 +73,10 @@ $define = [
     'IMAGE_ICON_DELETE' =>  ' Delete Message ',
 
     'SEND_NEW_EMAIL' =>  'Send New Email',
-    'BUTTON_SEARCH' =>  'Search Archive',
+    'BUTTON_SEARCH_ARCHIVE' =>  'Search Archive',
     'BUTTON_TRIM_CONFIRM' =>  'Delete email',
     'BUTTON_CANCEL' =>  'Cancel',
+    'BUTTON_RESET_SEARCH_ARCHIVE' =>  'Reset',
 ];
 
 return $define;

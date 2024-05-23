@@ -91,8 +91,33 @@ function zen_is_message_trustable($from, $module): bool
     return true;
 }
 
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+
+// handle remembering previous search criteria
+$rememberable_vars = ['start_date', 'end_date', 'date_range', 'search_text', 'module', 'isForDisplay', 'only_errors'];
+if ($action === 'reset') {
+    unset($_SESSION['email_archive_search_criteria']);
+    foreach($rememberable_vars as $var) {
+        unset($_POST[$var]);
+    }
+}
+if ($action === 'search') {
+    foreach($rememberable_vars as $var) {
+        $_SESSION['email_archive_search_criteria'][$var] = $_POST[$var] ?? null;
+    }
+} elseif (!empty($_SESSION['email_archive_search_criteria'])) {
+    foreach($rememberable_vars as $var) {
+        if (isset($_SESSION['email_archive_search_criteria'][$var])) {
+                $_POST[$var] = $_SESSION['email_archive_search_criteria'][$var];
+        }
+    }
+}
 
 $allow_html = true;
+$isForDisplay = empty($_POST['print_format']);
+if ($action === 'prev_text' || $action === 'prev_html') {
+    $isForDisplay = false;
+}
 $only_errors = !empty($_POST['only_errors']);
 $search_text = isset($_POST['search_text']) && zen_not_null($_POST['search_text']) ? $_POST['search_text'] : '';
 $search_module = !empty($_POST['module']) && (int)$_POST['module'] !== 1 ? $_POST['module'] : 0;
@@ -143,12 +168,6 @@ if (zcDate::validateDate($ed_raw) !== true) {
 }
 
 $archive_search_sql = zen_get_email_archive_search_query($search_text, $sd_raw, $ed_raw, $search_module, $only_errors);
-
-$action = $_GET['action'] ?? $_POST['action'] ?? '';
-$isForDisplay = empty($_POST['print_format']);
-if ($action === 'prev_text' || $action === 'prev_html') {
-    $isForDisplay = false;
-}
 
 switch($action) {
     case 'resend':
@@ -353,6 +372,7 @@ if ($isForDisplay) { ?>
         </div>
 
         <?= zen_draw_form('search', FILENAME_EMAIL_HISTORY) ?>
+        <?= zen_draw_hidden_field('action', 'search') ?>
         <div class="row">
             <div class="col-sm-3">
                 <div class="form-group">
@@ -413,7 +433,8 @@ if ($isForDisplay) { ?>
                     </label>
                 </div>
 
-                <input type="submit" value="<?= BUTTON_SEARCH ?>" class="btn btn-primary">
+                <input type="submit" value="<?= BUTTON_SEARCH_ARCHIVE ?>" class="btn btn-primary">
+                <input type="submit" value="<?= BUTTON_RESET_SEARCH_ARCHIVE ?>" class="btn btn-default" formaction="<?= zen_href_link(FILENAME_EMAIL_HISTORY, 'action=reset') ?>">
             </div>
         </div>
 
