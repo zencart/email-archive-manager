@@ -110,6 +110,16 @@ if ($search_ed) {
     $ed_raw = $_POST['end_date'];
 }
 $date_range = $_POST['date_range'] ?? ' ';
+// If no date range at all is supplied, initial page load should default to past 30 days
+if (!isset($_POST['date_range']) && !isset($_POST['start_date']) && !isset($_POST['end_date'])) {
+    $date_range = 'last_30_days';
+    $sd_raw = new \DateTime();
+    $sd_raw->sub(DateInterval::createFromDateString(('30 days')));
+    $ed_raw = new \DateTime();
+
+    $sd_raw = $sd_raw->format(zen_datepicker_format_fordate(DATE_FORMAT_DATE_PICKER));
+    $ed_raw = $ed_raw->format(zen_datepicker_format_fordate(DATE_FORMAT_DATE_PICKER));
+}
 
 if (DATE_FORMAT_DATE_PICKER !== 'yy-mm-dd') {
     $local_fmt = zen_datepicker_format_fordate();
