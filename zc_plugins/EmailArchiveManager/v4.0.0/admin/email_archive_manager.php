@@ -536,7 +536,7 @@ if ($isForDisplay) { ?>
                 $mail_button = '<a href="mailto:' . $archive->email_to_address . '" class="btn btn-primary" role="button">' . SEND_NEW_EMAIL . '</a>';
             }
 
-            $heading[] = ['text' => '<b>' . TEXT_ARCHIVE_ID . $archive->archive_id . '&nbsp; - &nbsp;' . zen_datetime_short($archive->date_sent) . '</b>'];
+            $heading[] = ['text' => '<b>' . sprintf(TEXT_ARCHIVE_ID, $archive->archive_id) . '&nbsp; - &nbsp;' . zen_datetime_short($archive->date_sent) . '</b>'];
 
             $contents = ['form' => zen_draw_form('archive_actions', FILENAME_EMAIL_HISTORY, 'action=resend', 'post', 'class="form-horizontal"') . zen_draw_hidden_field('archive_id', $archive->archive_id)];
 
