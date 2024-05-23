@@ -247,19 +247,19 @@ if ($isForDisplay) { ?>
             </div>
         </div>
         <div class="row">
-            <div class="col-sm-1 text-right"><b><?= TEXT_EMAIL_FROM; ?></b></div>
+            <div class="col-sm-1 text-right"><b><?= TEXT_EMAIL_FROM ?></b></div>
             <div class="col-sm-6 text-left"><?= $this_email->fields['email_from_name'] . ' [' . $this_email->fields['email_from_address'] . ']' ?></div>
         </div>
         <div class="row">
-            <div class="col-sm-1 text-right"><b><?= TEXT_EMAIL_TO; ?></b></div>
+            <div class="col-sm-1 text-right"><b><?= TEXT_EMAIL_TO ?></b></div>
             <div class="col-sm-6 text-left"><?= $this_email->fields['email_to_name'] . ' [' . $this_email->fields['email_to_address'] . ']' ?></div>
         </div>
         <div class="row">
-            <div class="col-sm-1 text-right"><b><?= TEXT_EMAIL_DATE_SENT; ?></b></div>
+            <div class="col-sm-1 text-right"><b><?= TEXT_EMAIL_DATE_SENT ?></b></div>
             <div class="col-sm-6 text-left"><?= zen_datetime_short($this_email->fields['date_sent']) ?></div>
         </div>
         <div class="row">
-            <div class="col-sm-1 text-right"><b><?= TEXT_EMAIL_SUBJECT; ?></b></div>
+            <div class="col-sm-1 text-right"><b><?= TEXT_EMAIL_SUBJECT ?></b></div>
             <div class="col-sm-6 text-left"><?= zen_output_string_protected($this_email->fields['email_subject']) ?></div>
         </div>
 
@@ -355,21 +355,21 @@ if ($isForDisplay) { ?>
         <div class="row">
             <div class="col-sm-3">
                 <div class="form-group">
-                    <?= zen_draw_label(HEADING_START_DATE, 'start_date', 'class="control-label"'); ?>
+                    <?= zen_draw_label(HEADING_START_DATE, 'start_date', 'class="control-label"') ?>
                     <div class="date input-group" id="datepicker_start_date">
                         <span class="input-group-addon datepicker_icon"><?= zen_icon('calendar-days', size: 'lg') ?></span>
-                        <?= zen_draw_input_field('start_date', $sd_raw, 'class="form-control" id="start_date"'); ?>
+                        <?= zen_draw_input_field('start_date', $sd_raw, 'class="form-control" id="start_date"') ?>
                     </div>
                 </div>
                 <div class="form-group">
-                    <?= zen_draw_label(HEADING_END_DATE, 'end_date', 'class="control-label"'); ?>
+                    <?= zen_draw_label(HEADING_END_DATE, 'end_date', 'class="control-label"') ?>
                     <div class="date input-group" id="datepicker_end_date">
                         <span class="input-group-addon datepicker_icon"><?= zen_icon('calendar-days', size: 'lg') ?></span>
-                        <?= zen_draw_input_field('end_date', $ed_raw, 'class="form-control" id="end_date"'); ?>
+                        <?= zen_draw_input_field('end_date', $ed_raw, 'class="form-control" id="end_date"') ?>
                     </div>
                 </div>
                 <div class="form-group">
-                    <?= zen_draw_label(HEADING_DATE_RANGE, 'date_range', 'class="control-label"'); ?>
+                    <?= zen_draw_label(HEADING_DATE_RANGE, 'date_range', 'class="control-label"') ?>
                     <?= zen_draw_pull_down_menu('date_range', [
                         [ 'id' => ' ', 'text' => 'All time' ],
                         [ 'id' => 'last_7_days', 'text' => 'Last 7 days' ],
@@ -433,7 +433,7 @@ if ($isForDisplay) { ?>
                 <th class="dataTableHeadingContent"><?= TABLE_HEADING_EMAIL_SUBJECT ?></th>
                 <th class="dataTableHeadingContent"><?= TABLE_HEADING_EMAIL_ERRORINFO ?></th>
                 <th class="dataTableHeadingContent text-right"><?= TABLE_HEADING_EMAIL_FORMAT ?></th>
-                <th class="dataTableHeadingContent text-right"><?= TABLE_HEADING_ACTION; ?></th>
+                <th class="dataTableHeadingContent text-right"><?= TABLE_HEADING_ACTION ?></th>
             </tr>
             </thead>
             <tbody>
@@ -479,7 +479,7 @@ if ($isForDisplay) { ?>
                 $role = 'role="option" aria-selected="true"';
             }
             ?>
-            <tr <?= $class_and_id; ?> onclick="document.location.href='<?= $href ?>'" <?= $role ?>>
+            <tr <?= $class_and_id ?> onclick="document.location.href='<?= $href ?>'" <?= $role ?>>
                 <td class="dataTableContent"><?= zen_icon('circle-info', sprintf(TEXT_ARCHIVE_ID, $archive_record['archive_id'])) .
                     '&nbsp;' . zen_datetime_short($archive_record['date_sent']) ?></td>
                 <td class="dataTableContent"><?= $archive_record['email_to_name'] ?></td>
