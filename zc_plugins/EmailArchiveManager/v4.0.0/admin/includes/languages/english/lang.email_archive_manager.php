@@ -21,8 +21,8 @@ $define = [
     'HEADING_ONLY_ERRORS' => 'Only With Error',
     'HEADING_TRIM_INSTRUCT' =>  'Delete email older than...',
 
-    'TOOLTIP_SEARCH_TEXT' => 'Searches in: Recipient Name and Address, email Subject, email HTML and TEXT content, and the Error Info column.',
-    'TOOLTIP_ONLY_ERRORS' => 'Only display rows with a value in the \'Error Info\' column, indicating an error occurred trying to send the email.',
+    'TOOLTIP_SEARCH_TEXT' => 'Searches in: Recipient Name and Address, email Subject, email HTML and TEXT content, and any error messages.',
+    'TOOLTIP_ONLY_ERRORS' => 'Only display records where an error occurred trying to send the email.',
 
     'HEADING_TEXT_INSTEAD' =>  'Showing TEXT for safety; HTML may be malicious.',
 
