@@ -265,6 +265,7 @@ if ($isForDisplay) { ?>
 
         <div id="PreviewEmailBlock" class="row">
             <div class="col-sm-11 col-sm-offset-1 mt-3">
+                <!-- NOTE: a table with old syntax is used here intentionally for the sake of email HTML, to accommodate lowest-common-denominator (email HTML standards are very ancient) -->
                 <table id="PreviewEmailTable" border="0" cellspacing="0" cellpadding="10">
                     <tr>
                         <td><?= ($action === 'prev_html') ? $html_content : $text_content ?></td>
