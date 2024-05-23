@@ -394,7 +394,7 @@ if ($isForDisplay) { ?>
                 <div class="form-group">
                 <?php
                 echo zen_draw_label(HEADING_MODULE_SELECT, 'search_module', 'class="control-label"') . '<br>';
-                echo zen_draw_pull_down_menu('module', $email_module_array, $_GET['module'] ?? '', 'id="search_module" class="form-control"');
+                echo zen_draw_pull_down_menu('module', $email_module_array, $search_module, 'id="search_module" class="form-control"');
                 ?>
                 </div>
             </div>
