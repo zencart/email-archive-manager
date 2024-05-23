@@ -16,7 +16,7 @@
     border-width: 5px;
 }
 
-.errorinfoText {
+.overflowText {
     text-overflow: ellipsis;
     white-space: nowrap;
     max-width: 12em;
