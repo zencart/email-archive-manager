@@ -6,7 +6,7 @@
  */
 
 $define = [
-    'BOX_TOOLS_EMAIL_ARCHIVE_MANAGER' => 'E-mail Archive Manager',
+    'BOX_TOOLS_EMAIL_ARCHIVE_MANAGER' => 'Email Archive Manager',
 ];
 
 return $define;
