@@ -43,10 +43,6 @@ function zen_get_email_archive_search_query(
     ];
     $where_clauses = [];
 
-    if (!empty($error_keywords)) {
-        $where_clauses[] = "errorinfo LIKE '%$error_keywords%'";
-    }
-
     if ($only_errors) {
         $where_clauses[] = 'errorinfo IS NOT NULL';
     }
@@ -485,14 +481,14 @@ if ($isForDisplay) { ?>
             }
             ?>
             <tr <?= $class_and_id; ?> onclick="document.location.href='<?= $href ?>'" <?= $role;?>>
-                <td class="dataTableContent column-date-sent"><?= zen_icon('circle-info', sprintf(TEXT_ARCHIVE_ID, $archive_record['archive_id'])) .
+                <td class="dataTableContent"><?= zen_icon('circle-info', sprintf(TEXT_ARCHIVE_ID, $archive_record['archive_id'])) .
                     '&nbsp;' . zen_datetime_short($archive_record['date_sent']) ?></td>
-                <td class="dataTableContent column-email-to-name"><?= $archive_record['email_to_name'] ?></td>
-                <td class="dataTableContent column-email-to-address"><?= $archive_record['email_to_address'] ?></td>
-                <td class="dataTableContent column-email-subject overflowText"><?= zen_output_string_protected(zen_trunc_string($archive_record['email_subject'], SUBJECT_SIZE_LIMIT)) ?></td>
-                <td class="dataTableContent column-errorinfo overflowText"><?= zen_output_string_protected(zen_trunc_string($archive_record['errorinfo'], MESSAGE_SIZE_LIMIT)) ?></td>
+                <td class="dataTableContent"><?= $archive_record['email_to_name'] ?></td>
+                <td class="dataTableContent"><?= $archive_record['email_to_address'] ?></td>
+                <td class="dataTableContent overflowText"><?= zen_output_string_protected(zen_trunc_string($archive_record['email_subject'], SUBJECT_SIZE_LIMIT)) ?></td>
+                <td class="dataTableContent overflowText"><?= zen_output_string_protected(zen_trunc_string($archive_record['errorinfo'], MESSAGE_SIZE_LIMIT)) ?></td>
                 <td class="dataTableContent"><?= !empty($archive_record['email_html']) ? TABLE_FORMAT_HTML : TABLE_FORMAT_TEXT ?></td>
-                <td class="dataTableContent column-actions text-right actions">
+                <td class="dataTableContent text-right actions">
                 <?php
                     if (isset($archive) && is_object($archive) && ($archive_record['archive_id'] == $archive->archive_id) && $isForDisplay) {
                         echo zen_icon('caret-right', ICON_SELECTED, '2x', true);
