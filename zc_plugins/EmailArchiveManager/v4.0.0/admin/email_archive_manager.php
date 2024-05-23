@@ -372,11 +372,11 @@ if ($isForDisplay) { ?>
                 <div class="form-group">
                     <?= zen_draw_label(HEADING_DATE_RANGE, 'date_range', 'class="control-label"') ?>
                     <?= zen_draw_pull_down_menu('date_range', [
-                        [ 'id' => ' ', 'text' => 'All time' ],
-                        [ 'id' => 'last_7_days', 'text' => 'Last 7 days' ],
-                        [ 'id' => 'last_30_days', 'text' => 'Last 30 days' ],
-                        [ 'id' => 'last_3_months', 'text' => 'Last 3 months' ],
-                        [ 'id' => 'last_year', 'text' => 'Last year' ],
+                        ['id' => ' ', 'text' => TEXT_DROPDOWN_DATE_SELECT_ALL],
+                        ['id' => 'last_7_days', 'text' => TEXT_DROPDOWN_DATE_SELECT_7_DAYS],
+                        ['id' => 'last_30_days', 'text' => TEXT_DROPDOWN_DATE_SELECT_30_DAYS],
+                        ['id' => 'last_3_months', 'text' => TEXT_DROPDOWN_DATE_SELECT_3_MONTHS],
+                        ['id' => 'last_year', 'text' => TEXT_DROPDOWN_DATE_SELECT_LAST_YEAR],
                     ],
                     $date_range, 'id="date_range" class="form-control"') ?>
                 </div>

@@ -52,6 +52,13 @@ $define = [
     'RADIO_1_MONTH' =>  ' 1 month',
     'RADIO_6_MONTHS' =>  ' 6 months',
     'RADIO_1_YEAR' =>  ' 12 months',
+
+    'TEXT_DROPDOWN_DATE_SELECT_ALL' =>  'All time',
+    'TEXT_DROPDOWN_DATE_SELECT_7_DAYS' =>  'Last 7 days',
+    'TEXT_DROPDOWN_DATE_SELECT_30_DAYS' =>  'Last 30 days',
+    'TEXT_DROPDOWN_DATE_SELECT_3_MONTHS' =>  'Last 3 months',
+    'TEXT_DROPDOWN_DATE_SELECT_LAST_YEAR' =>  'Last year',
+
     'TEXT_RESEND_PREFIX' => 'Resend: ',
     'TRIM_CONFIRM_WARNING' =>  'Warning: This will permanently remove email from the archive.<br>Are you sure?',
     'POPUP_CONFIRM_RESEND' =>  'Are you sure you want to resend this message?',
