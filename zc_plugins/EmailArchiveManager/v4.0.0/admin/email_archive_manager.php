@@ -94,7 +94,7 @@ function zen_is_message_trustable($from, $module): bool
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 // handle remembering previous search criteria
-$rememberable_vars = ['start_date', 'end_date', 'date_range', 'search_text', 'module', 'isForDisplay', 'only_errors'];
+$rememberable_vars = ['start_date', 'end_date', 'date_range', 'search_text', 'module', 'print_format', 'only_errors'];
 if ($action === 'reset') {
     unset($_SESSION['email_archive_search_criteria']);
     zen_redirect(zen_href_link(FILENAME_EMAIL_HISTORY));
