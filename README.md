@@ -1,6 +1,7 @@
 # Email Archive Manager plugin for Zen Cart 
 
 Allows you to view emails sent by your shopping cart.
+
 (Requires the `Email Archiving Active?` flag in Admin > Configuration > Email to be set to `true`.)
 
 - Search for emails using any combination of date range, subject, recipient, body text, delivery failure message, or what part of the store sent the message.
