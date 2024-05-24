@@ -258,19 +258,19 @@ if ($action === 'prev_text' || $action === 'prev_html') {
             </div>
         </div>
         <div class="row">
-            <div class="col-sm-1 text-right"><b><?= TEXT_EMAIL_FROM ?></b></div>
+            <div class="col-sm-3 text-right"><b><?= TEXT_EMAIL_FROM ?></b></div>
             <div class="col-sm-6 text-left"><?= $this_email->fields['email_from_name'] . ' [' . $this_email->fields['email_from_address'] . ']' ?></div>
         </div>
         <div class="row">
-            <div class="col-sm-1 text-right"><b><?= TEXT_EMAIL_TO ?></b></div>
+            <div class="col-sm-3 text-right"><b><?= TEXT_EMAIL_TO ?></b></div>
             <div class="col-sm-6 text-left"><?= $this_email->fields['email_to_name'] . ' [' . $this_email->fields['email_to_address'] . ']' ?></div>
         </div>
         <div class="row">
-            <div class="col-sm-1 text-right"><b><?= TEXT_EMAIL_DATE_SENT ?></b></div>
+            <div class="col-sm-3 text-right"><b><?= TEXT_EMAIL_DATE_SENT ?></b></div>
             <div class="col-sm-6 text-left"><?= zen_datetime_short($this_email->fields['date_sent']) ?></div>
         </div>
         <div class="row">
-            <div class="col-sm-1 text-right"><b><?= TEXT_EMAIL_SUBJECT ?></b></div>
+            <div class="col-sm-3 text-right"><b><?= TEXT_EMAIL_SUBJECT ?></b></div>
             <div class="col-sm-6 text-left"><?= zen_output_string_protected($this_email->fields['email_subject']) ?></div>
         </div>
 
