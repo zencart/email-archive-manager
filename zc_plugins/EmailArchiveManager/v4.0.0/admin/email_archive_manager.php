@@ -229,7 +229,7 @@ if ($action === 'prev_text' || $action === 'prev_html') {
 <body<?=$body_params ?? '' ?>>
 
 <div class="hidden-print">
-<?php if (empty($hide_header_footer)) DIR_WS_INCLUDES . 'header.php'; ?>
+<?php if (empty($hide_header_footer)) require DIR_WS_INCLUDES . 'header.php'; ?>
 </div>
 <div class="container-fluid">
 
