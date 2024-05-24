@@ -225,18 +225,14 @@ foreach ($results as $result) {
 <?php require DIR_WS_INCLUDES . 'admin_html_head.php'; ?>
 </head>
 <?php
-if ($action === 'prev_text' || $action === 'prev_html') { ?>
-<body marginwidth="0" marginheight="0" topmargin="0" bottommargin="0" leftmargin="0" rightmargin="0" bgcolor="#FFFFFF">
-<?php
+if ($action === 'prev_text' || $action === 'prev_html') {
+  $body_params = ' marginwidth="0" marginheight="0" topmargin="0" bottommargin="0" leftmargin="0" rightmargin="0" bgcolor="#FFFFFF"';
 }
-if ($isForDisplay) { ?>
-
-<body>
-<?php require DIR_WS_INCLUDES . 'header.php'; ?>
-<?php
-}
-
 ?>
+<body<?=$body_params ?? '' ?>>
+if ($isForDisplay) { ?>
+<?php require DIR_WS_INCLUDES . 'header.php'; ?>
+<?php } ?>
 <div class="container-fluid">
 
         <?php
@@ -296,7 +292,7 @@ if ($isForDisplay) { ?>
 
     case 'trim':
     ?>
-    <div id="TrimArchiveBlock">
+    <div id="TrimArchiveBlock" class="hidden-print">
         <div class="row">
             <div class="col-sm-12 h1">
                 <?= TEXT_TRIM_ARCHIVE ?>
@@ -345,6 +341,7 @@ if ($isForDisplay) { ?>
         <?php
         break;
 
+    case 'search':
     default:
     ?>
     <div class="row">
@@ -481,8 +478,6 @@ if ($isForDisplay) { ?>
 
         $email_split = new splitPageResults($_GET['page'], $max_records_per_page, $archive_search_sql, $email_query_numrows);
 
-// DEBUG
-//echo '<br>' . $archive_search . '<br>';
         $results = $db->Execute($archive_search_sql);
 
         foreach ($results as $archive_record) {
@@ -606,12 +601,12 @@ if ($isForDisplay) { ?>
         }
         ?>
         </div>
-    </div>
-<!-- body_text_eof //-->
-</div>
+</div><!-- row_eof //-->
+</div><!-- container-fluid_eof //-->
+
 <?php
 break;
-}
+} // end switch($action)
 ?>
 </div>
 <?php
