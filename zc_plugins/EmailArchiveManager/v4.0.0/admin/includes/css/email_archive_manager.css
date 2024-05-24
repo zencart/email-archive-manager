@@ -22,3 +22,5 @@
     max-width: 12em;
     overflow: hidden;
 }
+
+@media print{@page {size: landscape;}}

@@ -94,7 +94,7 @@ function zen_is_message_trustable($from, $module): bool
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 // handle remembering previous search criteria
-$rememberable_vars = ['start_date', 'end_date', 'date_range', 'search_text', 'module', 'print_format', 'only_errors'];
+$rememberable_vars = ['start_date', 'end_date', 'date_range', 'search_text', 'module', 'only_errors'];
 if ($action === 'reset') {
     unset($_SESSION['email_archive_search_criteria']);
     zen_redirect(zen_href_link(FILENAME_EMAIL_HISTORY));
@@ -112,10 +112,6 @@ if ($action === 'search') {
 }
 
 $allow_html = true;
-$isForDisplay = empty($_POST['print_format']);
-if ($action === 'prev_text' || $action === 'prev_html') {
-    $isForDisplay = false;
-}
 $only_errors = !empty($_POST['only_errors']);
 $search_text = isset($_POST['search_text']) && zen_not_null($_POST['search_text']) ? $_POST['search_text'] : '';
 $search_module = !empty($_POST['module']) && (int)$_POST['module'] !== 1 ? $_POST['module'] : 0;
@@ -226,13 +222,15 @@ foreach ($results as $result) {
 </head>
 <?php
 if ($action === 'prev_text' || $action === 'prev_html') {
-  $body_params = ' marginwidth="0" marginheight="0" topmargin="0" bottommargin="0" leftmargin="0" rightmargin="0" bgcolor="#FFFFFF"';
+    $body_params = ' marginwidth="0" marginheight="0" topmargin="0" bottommargin="0" leftmargin="0" rightmargin="0" bgcolor="#FFFFFF"';
+    $hide_header_footer = true;
 }
 ?>
 <body<?=$body_params ?? '' ?>>
-if ($isForDisplay) { ?>
-<?php require DIR_WS_INCLUDES . 'header.php'; ?>
-<?php } ?>
+
+<div class="hidden-print">
+<?php if (empty($hide_header_footer)) DIR_WS_INCLUDES . 'header.php'; ?>
+</div>
 <div class="container-fluid">
 
         <?php
@@ -345,30 +343,23 @@ if ($isForDisplay) { ?>
     default:
     ?>
     <div class="row">
-    <?php if (!$isForDisplay) { ?>
-        <div class="col-sm-4">
-            <?= '<a href="' . zen_href_link(FILENAME_EMAIL_HISTORY, 'action=' . $action) . '"><span class="pageHeading">' . HEADING_TITLE . '</span></a>' ?>
-        </div>
-        <div class="col-sm-6">
+        <div class="col-xs-12 visible-print">
             <?= date('l M d, Y', time()) ?>
         </div>
-
-    <?php } else { ?>
-
-        <div class="h1 col-sm-12">
-            <?= HEADING_TITLE ?>
+        <div class="h1 col-xs-12">
+            <?= '<a href="' . zen_href_link(FILENAME_EMAIL_HISTORY, 'action=' . $action) . '"><span class="pageHeading">' . HEADING_TITLE . '</span></a>' ?>
         </div>
 
-        <div class="col-sm-3 col-md-6">
+        <div class="col-xs-8 hidden-print">
             <?= HEADING_SEARCH_INSTRUCT ?>
         </div>
-        <div class="col-sm-3 col-md-6 text-right">
+        <div class="col-xs-4 text-right hidden-print">
             <?= '<a href="' . zen_href_link(FILENAME_EMAIL_HISTORY, 'action=trim') . '" class="btn btn-primary" role="button">' . TEXT_TRIM_ARCHIVE . '</a>' ?>
         </div>
 
         <?= zen_draw_form('search', FILENAME_EMAIL_HISTORY) ?>
         <?= zen_draw_hidden_field('action', 'search') ?>
-        <div class="row">
+        <div class="row hidden-print">
             <div class="col-sm-3">
                 <div class="form-group">
                     <?= zen_draw_label(HEADING_START_DATE, 'start_date', 'class="control-label"') ?>
@@ -396,7 +387,7 @@ if ($isForDisplay) { ?>
                     $date_range, 'id="date_range" class="form-control"') ?>
                 </div>
             </div>
-            <div class="col-sm-3">
+            <div class="col-sm-4 col-md-3">
                 <div class="form-group">
                     <?= zen_draw_label(HEADING_SEARCH_TEXT . ' ' . zen_icon('circle-info', TOOLTIP_SEARCH_TEXT), 'search_text', 'class="control-label"') ?>
                     <?= zen_draw_input_field('search_text', $search_text, 'id="search_text" class="form-control"') ?>
@@ -414,13 +405,7 @@ if ($isForDisplay) { ?>
                 </div>
             </div>
 
-            <div class="col-sm-4">
-                <div class="checkbox">
-                    <label for="print_format">
-                        <?= zen_draw_checkbox_field('print_format', 1, !$isForDisplay, '', 'id="print_format"') ?>
-                        <?= HEADING_PRINT_FORMAT ?>
-                    </label>
-                </div>
+            <div class="col-sm-5 col-md-6">
                 <div class="checkbox">
                     <label for="only_errors">
                     <?= zen_draw_checkbox_field('only_errors', 1, $only_errors, '', 'id="only_errors"') ?>
@@ -436,11 +421,7 @@ if ($isForDisplay) { ?>
         <?= '</form>' ?>
 
 
-    <?php } ?>
-
-<!--    </div>-->
-
-    <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 configurationColumnLeft">
+    <div class="col-xs-12 col-md-9 col-lg-9 configurationColumnLeft">
         <table class="table table-hover" role="listbox">
             <thead>
             <tr class="dataTableHeadingRow">
@@ -450,7 +431,7 @@ if ($isForDisplay) { ?>
                 <th class="dataTableHeadingContent"><?= TABLE_HEADING_EMAIL_SUBJECT ?></th>
                 <th class="dataTableHeadingContent"><?= TABLE_HEADING_EMAIL_ERRORINFO ?></th>
                 <th class="dataTableHeadingContent text-right"><?= TABLE_HEADING_EMAIL_FORMAT ?></th>
-                <th class="dataTableHeadingContent text-right"><?= TABLE_HEADING_ACTION ?></th>
+                <th class="dataTableHeadingContent text-right hidden-print"><?= TABLE_HEADING_ACTION ?></th>
             </tr>
             </thead>
             <tbody>
@@ -488,7 +469,7 @@ if ($isForDisplay) { ?>
             $class_and_id = 'class="dataTableRow"';
             $role = 'role="option" aria-selected="false"';
             $href = zen_href_link(FILENAME_EMAIL_HISTORY, zen_get_all_get_params(['archive_id']) . 'archive_id=' . $archive_record['archive_id']);
-            if (isset($archive) && is_object($archive) && ($archive_record['archive_id'] == $archive->archive_id) && $isForDisplay) {
+            if (isset($archive) && is_object($archive) && ($archive_record['archive_id'] == $archive->archive_id)) {
                 $href = zen_href_link(FILENAME_EMAIL_HISTORY, zen_get_all_get_params(['archive_id', 'action']) . 'archive_id=' . $archive->archive_id . '&action=view');
                 $class_and_id = 'id="defaultSelected" class="dataTableRowSelected"';
                 $role = 'role="option" aria-selected="true"';
@@ -502,9 +483,9 @@ if ($isForDisplay) { ?>
                 <td class="dataTableContent overflowText"><?= zen_output_string_protected(zen_trunc_string($archive_record['email_subject'], SUBJECT_SIZE_LIMIT)) ?></td>
                 <td class="dataTableContent overflowText"><?= zen_output_string_protected(zen_trunc_string($archive_record['errorinfo'], MESSAGE_SIZE_LIMIT)) ?></td>
                 <td class="dataTableContent text-right"><?= !empty($archive_record['email_html']) ? TABLE_FORMAT_HTML : TABLE_FORMAT_TEXT ?></td>
-                <td class="dataTableContent text-right actions">
+                <td class="dataTableContent text-right actions hidden-print">
                 <?php
-                    if (isset($archive) && is_object($archive) && ($archive_record['archive_id'] == $archive->archive_id) && $isForDisplay) {
+                    if (isset($archive) && is_object($archive) && ($archive_record['archive_id'] == $archive->archive_id)) {
                         echo zen_icon('caret-right', ICON_SELECTED, '2x', true);
                     } else {
                     ?>
@@ -534,8 +515,8 @@ if ($isForDisplay) { ?>
             </table>
         </div>
 
-        </div>
-        <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 configurationColumnRight">
+    </div>
+    <div class="col-xs-12 col-md-3 col-lg-3 configurationColumnRight hidden-print">
 
         <?php
         // create sidebox
@@ -595,12 +576,12 @@ if ($isForDisplay) { ?>
             }
         }
 
-        if (!empty($heading) && !empty($contents) && $isForDisplay) {
+        if (!empty($heading) && !empty($contents)) {
             $box = new box;
             echo $box->infoBox($heading, $contents);
         }
         ?>
-        </div>
+    </div>
 </div><!-- row_eof //-->
 </div><!-- container-fluid_eof //-->
 
@@ -608,11 +589,10 @@ if ($isForDisplay) { ?>
 break;
 } // end switch($action)
 ?>
-</div>
-<?php
-if ($isForDisplay) {
-    require DIR_WS_INCLUDES . 'footer.php';
-    ?>
+
+    <div class="hidden-print">
+    <?php if (empty($hide_header_footer)) require DIR_WS_INCLUDES . 'footer.php'; ?>
+    </div>
     <!-- script for datepicker -->
     <script>
         $(function () {
@@ -652,9 +632,6 @@ if ($isForDisplay) {
             })
         })
     </script>
-<?php
-}
-?>
 </body>
 </html>
 <?php
