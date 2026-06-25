@@ -16,6 +16,13 @@
     border-width: 5px;
 }
 
+#PreviewEmailFrame {
+    width: 100%;
+    min-height: 60vh;
+    border: 0;
+    background-color: #FFFFFF;
+}
+
 .overflowText {
     text-overflow: ellipsis;
     white-space: nowrap;

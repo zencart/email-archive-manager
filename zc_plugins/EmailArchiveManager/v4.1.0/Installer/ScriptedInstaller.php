@@ -11,7 +11,6 @@ use Zencart\PluginSupport\ScriptedInstaller as ScriptedInstallBase;
 
 class ScriptedInstaller extends ScriptedInstallBase
 {
-
     /**
      * Zen Cart pre-v2.1 does not have this function built in, so provide a local implementation.
      *
@@ -34,7 +33,7 @@ class ScriptedInstaller extends ScriptedInstallBase
     {
         global $db, $sniffer;
         zen_deregister_admin_pages(['emailArchive']);
-        zen_register_admin_page('emailArchive', 'BOX_TOOLS_EMAIL_ARCHIVE_MANAGER','FILENAME_EMAIL_HISTORY', '', 'tools', 'Y', 20);
+        zen_register_admin_page('emailArchive', 'BOX_TOOLS_EMAIL_ARCHIVE_MANAGER', 'FILENAME_EMAIL_HISTORY', '', 'tools', 'Y', 20);
 
         if (!$sniffer->field_exists(TABLE_EMAIL_ARCHIVE, 'errorinfo')) {
             $sql = 'ALTER TABLE ' . TABLE_EMAIL_ARCHIVE . ' ADD COLUMN errorinfo TEXT DEFAULT NULL';

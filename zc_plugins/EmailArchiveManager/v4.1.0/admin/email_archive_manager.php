@@ -100,11 +100,11 @@ if ($action === 'reset') {
     zen_redirect(zen_href_link(FILENAME_EMAIL_HISTORY));
 }
 if ($action === 'search') {
-    foreach($rememberable_vars as $var) {
+    foreach ($rememberable_vars as $var) {
         $_SESSION['email_archive_search_criteria'][$var] = $_POST[$var] ?? null;
     }
 } elseif (!empty($_SESSION['email_archive_search_criteria'])) {
-    foreach($rememberable_vars as $var) {
+    foreach ($rememberable_vars as $var) {
         if (isset($_SESSION['email_archive_search_criteria'][$var])) {
                 $_POST[$var] = $_SESSION['email_archive_search_criteria'][$var];
         }
@@ -163,7 +163,7 @@ if (zcDate::validateDate($ed_raw) !== true) {
 
 $archive_search_sql = zen_get_email_archive_search_query($search_text, $sd_raw, $ed_raw, $search_module, $only_errors);
 
-switch($action) {
+switch ($action) {
     case 'resend':
         // retrieve the email record
         $email_sql = $db->Execute("SELECT * FROM " . TABLE_EMAIL_ARCHIVE . " WHERE archive_id = " . (int)$_POST['archive_id'], 1);
@@ -229,7 +229,9 @@ if ($action === 'prev_text' || $action === 'prev_html') {
 <body<?=$body_params ?? '' ?>>
 
 <div class="hidden-print">
-<?php if (empty($hide_header_footer)) require DIR_WS_INCLUDES . 'header.php'; ?>
+<?php if (empty($hide_header_footer)) {
+    require DIR_WS_INCLUDES . 'header.php';
+} ?>
 </div>
 <div class="container-fluid">
 
@@ -259,11 +261,11 @@ if ($action === 'prev_text' || $action === 'prev_html') {
         </div>
         <div class="row">
             <div class="col-sm-3 text-right"><b><?= TEXT_EMAIL_FROM ?></b></div>
-            <div class="col-sm-6 text-left"><?= $this_email->fields['email_from_name'] . ' [' . $this_email->fields['email_from_address'] . ']' ?></div>
+            <div class="col-sm-6 text-left"><?= zen_output_string_protected($this_email->fields['email_from_name']) . ' [' . zen_output_string_protected($this_email->fields['email_from_address']) . ']' ?></div>
         </div>
         <div class="row">
             <div class="col-sm-3 text-right"><b><?= TEXT_EMAIL_TO ?></b></div>
-            <div class="col-sm-6 text-left"><?= $this_email->fields['email_to_name'] . ' [' . $this_email->fields['email_to_address'] . ']' ?></div>
+            <div class="col-sm-6 text-left"><?= zen_output_string_protected($this_email->fields['email_to_name']) . ' [' . zen_output_string_protected($this_email->fields['email_to_address']) . ']' ?></div>
         </div>
         <div class="row">
             <div class="col-sm-3 text-right"><b><?= TEXT_EMAIL_DATE_SENT ?></b></div>
@@ -478,8 +480,8 @@ if ($action === 'prev_text' || $action === 'prev_html') {
             <tr <?= $class_and_id ?> onclick="document.location.href='<?= $href ?>'" <?= $role ?>>
                 <td class="dataTableContent"><?= zen_icon('circle-info', sprintf(TEXT_ARCHIVE_ID, $archive_record['archive_id'])) .
                     '&nbsp;' . zen_datetime_short($archive_record['date_sent']) ?></td>
-                <td class="dataTableContent"><?= $archive_record['email_to_name'] ?></td>
-                <td class="dataTableContent"><?= $archive_record['email_to_address'] ?></td>
+                <td class="dataTableContent"><?= zen_output_string_protected($archive_record['email_to_name']) ?></td>
+                <td class="dataTableContent"><?= zen_output_string_protected($archive_record['email_to_address']) ?></td>
                 <td class="dataTableContent overflowText"><?= zen_output_string_protected(zen_trunc_string($archive_record['email_subject'], SUBJECT_SIZE_LIMIT)) ?></td>
                 <td class="dataTableContent overflowText"><?= zen_output_string_protected(zen_trunc_string($archive_record['errorinfo'], MESSAGE_SIZE_LIMIT)) ?></td>
                 <td class="dataTableContent text-right"><?= !empty($archive_record['email_html']) ? TABLE_FORMAT_HTML : TABLE_FORMAT_TEXT ?></td>
@@ -543,7 +545,7 @@ if ($action === 'prev_text' || $action === 'prev_html') {
 
             $contents[] = ['align' => 'center', 'text' => '
                                 <button type="submit" class="btn btn-primary" onclick="return confirm(\'' . POPUP_CONFIRM_RESEND . '\');" >' . IMAGE_ICON_RESEND . '</button><br><br>
-                                <button type="submit" class="btn btn-danger" onclick="return confirm(\'' . POPUP_CONFIRM_DELETE . '\');" formaction="'. zen_href_link(FILENAME_EMAIL_HISTORY, 'action=delete') .'">' . IMAGE_ICON_DELETE . '</button>'
+                                <button type="submit" class="btn btn-danger" onclick="return confirm(\'' . POPUP_CONFIRM_DELETE . '\');" formaction="' . zen_href_link(FILENAME_EMAIL_HISTORY, 'action=delete') . '">' . IMAGE_ICON_DELETE . '</button>',
             ];
 
             $contents[] = [
@@ -561,9 +563,9 @@ if ($action === 'prev_text' || $action === 'prev_html') {
                 }
             }
             $contents[] = ['text' => '<br>' . zen_draw_separator()];
-            $contents[] = ['text' => '<br><b>' . TEXT_EMAIL_MODULE . '</b>' . $archive->module];
-            $contents[] = ['text' => '<b>' . TEXT_EMAIL_FROM . '</b>' . $archive->email_from_name . ' [' . $archive->email_from_address . ']'];
-            $contents[] = ['text' => '<br><b>' . TEXT_EMAIL_TO . '</b>' . $archive->email_to_name . ' [' . $archive->email_to_address . ']'];
+            $contents[] = ['text' => '<br><b>' . TEXT_EMAIL_MODULE . '</b>' . zen_output_string_protected($archive->module)];
+            $contents[] = ['text' => '<b>' . TEXT_EMAIL_FROM . '</b>' . zen_output_string_protected($archive->email_from_name) . ' [' . zen_output_string_protected($archive->email_from_address) . ']'];
+            $contents[] = ['text' => '<br><b>' . TEXT_EMAIL_TO . '</b>' . zen_output_string_protected($archive->email_to_name) . ' [' . zen_output_string_protected($archive->email_to_address) . ']'];
             $contents[] = ['text' => '<b>' . TEXT_EMAIL_DATE_SENT . '</b>' . $archive->date_sent];
             $contents[] = ['text' => '<b>' . TEXT_EMAIL_SUBJECT . '</b>' . zen_output_string_protected($archive->email_subject)];
             $contents[] = ['text' => '<br><b>' . TEXT_EMAIL_EXCERPT . '</b>'];
@@ -577,7 +579,7 @@ if ($action === 'prev_text' || $action === 'prev_html') {
         }
 
         if (!empty($heading) && !empty($contents)) {
-            $box = new box;
+                    $box = new box();
             echo $box->infoBox($heading, $contents);
         }
         ?>
@@ -591,7 +593,9 @@ break;
 ?>
 
     <div class="hidden-print">
-    <?php if (empty($hide_header_footer)) require DIR_WS_INCLUDES . 'footer.php'; ?>
+    <?php if (empty($hide_header_footer)) {
+        require DIR_WS_INCLUDES . 'footer.php';
+    } ?>
     </div>
     <!-- script for datepicker -->
     <script>
