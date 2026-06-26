@@ -1,8 +1,8 @@
 <?php
 /**
- * @copyright Copyright 2003-2024 Zen Cart Development Team
+ * @copyright Copyright 2003-2026 Zen Cart Development Team
  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
- * @version $Id: DrByte 2024 May 17  Plugin version 4.0 $
+ * @version $Id: DrByte 2026 June 17  Plugin version 4.1 $
  *
  * @var messageStack $messageStack
  * @var queryFactory $db
@@ -10,22 +10,42 @@
 
 /**
  * Email Archive Manager
-*/
+ */
 
-define('SUBJECT_SIZE_LIMIT', 200);
-define('MESSAGE_SIZE_LIMIT', 550);
-define('MESSAGE_LIMIT_BREAK', '&hellip;');
+defined('SUBJECT_SIZE_LIMIT') || define('SUBJECT_SIZE_LIMIT', 200);
+defined('MESSAGE_SIZE_LIMIT') || define('MESSAGE_SIZE_LIMIT', 550);
+defined('MESSAGE_LIMIT_BREAK') || define('MESSAGE_LIMIT_BREAK', '&hellip;');
 
 require 'includes/application_top.php';
 
-$max_records_per_page = (int)MAX_DISPLAY_SEARCH_RESULTS_ORDERS;
+if (function_exists('zen_config')) {
+    $max_records_per_page = (int)zen_config('MAX_DISPLAY_SEARCH_RESULTS_ORDERS');
+} else {
+    $max_records_per_page = (int)MAX_DISPLAY_SEARCH_RESULTS_ORDERS;
+}
+
+
+// Get list of modules related to records in this db
+$results = $db->Execute("SELECT DISTINCT module FROM " . TABLE_EMAIL_ARCHIVE . " ORDER BY module");
+$email_module_array[] = [
+    'id' => 0,
+    'text' => TEXT_ALL_MODULES,
+];
+$id = 0;
+foreach ($results as $result) {
+    $id++;
+    $email_module_array[] = [
+        'id' => $id,
+        'text' => $result['module'],
+    ];
+}
 
 function zen_get_email_archive_search_query(
     string $search_text,
     string $sd_raw,
     string $ed_raw,
     string $search_module,
-    string $only_errors
+    bool $only_errors
 ): string
 {
     $select_fields = [
@@ -114,7 +134,19 @@ if ($action === 'search') {
 $allow_html = true;
 $only_errors = !empty($_POST['only_errors']);
 $search_text = isset($_POST['search_text']) && zen_not_null($_POST['search_text']) ? $_POST['search_text'] : '';
-$search_module = !empty($_POST['module']) && (int)$_POST['module'] !== 1 ? $_POST['module'] : 0;
+
+// look up the text module name from the id
+$module_number = !empty($_POST['module']) ? (int)$_POST['module'] : 0;
+$search_module = '';
+if ($module_number > 0) {
+    foreach ($email_module_array as $email_module) {
+        if ((int)$email_module['id'] === $module_number && $email_module['text'] !== TEXT_ALL_MODULES) {
+            $search_module = $email_module['text'];
+            break;
+        }
+    }
+}
+
 $search_sd = !empty($_POST['start_date']);
 $search_ed = !empty($_POST['end_date']);
 $sd_raw = $ed_raw = '';
@@ -141,27 +173,27 @@ if (DATE_FORMAT_DATE_PICKER !== 'yy-mm-dd') {
 
     if (!empty($sd_raw)) {
         $dt = DateTime::createFromFormat($local_fmt, $sd_raw);
-        $sd_raw = 'null';
+        $sd_raw = null;
         if (!empty($dt)) {
             $sd_raw = $dt->format('Y-m-d');
         }
     }
     if (!empty($ed_raw)) {
         $dt = DateTime::createFromFormat($local_fmt, $ed_raw);
-        $ed_raw = 'null';
+        $ed_raw = null;
         if (!empty($dt)) {
             $ed_raw = $dt->format('Y-m-d');
         }
     }
 }
-if (zcDate::validateDate($sd_raw) !== true) {
+if (zcDate::validateDate($sd_raw ?? '') !== true) {
     $search_sd = false;
 }
-if (zcDate::validateDate($ed_raw) !== true) {
+if (zcDate::validateDate($ed_raw ?? '') !== true) {
     $search_ed = false;
 }
 
-$archive_search_sql = zen_get_email_archive_search_query($search_text, $sd_raw, $ed_raw, $search_module, $only_errors);
+$archive_search_sql = zen_get_email_archive_search_query($search_text, $sd_raw ?? '', $ed_raw ?? '', $search_module, $only_errors);
 
 switch ($action) {
     case 'resend':
@@ -169,7 +201,7 @@ switch ($action) {
         $email_sql = $db->Execute("SELECT * FROM " . TABLE_EMAIL_ARCHIVE . " WHERE archive_id = " . (int)$_POST['archive_id'], 1);
         $email = new objectInfo($email_sql->fields);
         // resend the message
-        // we use 'xml_record' to block out the HTML content.
+        // we use [] blank array and 'xml_record' to block out the HTML content on the re-send.
         zen_mail($email->email_to_name, $email->email_to_address, zen_output_string_protected($email->email_subject), $email->email_text, $email->email_from_name, $email->email_from_address, [], 'xml_record');
         $messageStack->add_session(sprintf(SUCCESS_EMAIL_RESENT, $email->archive_id, $email->email_to_address), 'success');
         zen_redirect(zen_href_link(FILENAME_EMAIL_HISTORY));
@@ -200,20 +232,6 @@ switch ($action) {
         zen_redirect(zen_href_link(FILENAME_EMAIL_HISTORY));
         break;
 }
-
-// Get list of modules related to records in this db
-$results = $db->Execute("SELECT DISTINCT module FROM " . TABLE_EMAIL_ARCHIVE . " ORDER BY module");
-$email_module_array[] = [
-    'id' => 1,
-    'text' => TEXT_ALL_MODULES,
-];
-foreach ($results as $result) {
-    $email_module_array[] = [
-        'id' => $result['module'],
-        'text' => $result['module'],
-    ];
-}
-
 ?>
 <!doctype html>
 <html <?= HTML_PARAMS ?>>
@@ -402,7 +420,7 @@ if ($action === 'prev_text' || $action === 'prev_html') {
                 <div class="form-group">
                 <?php
                 echo zen_draw_label(HEADING_MODULE_SELECT, 'search_module', 'class="control-label"') . '<br>';
-                echo zen_draw_pull_down_menu('module', $email_module_array, $search_module, 'id="search_module" class="form-control"');
+                echo zen_draw_pull_down_menu('module', $email_module_array, $module_number, 'id="search_module" class="form-control"');
                 ?>
                 </div>
             </div>
